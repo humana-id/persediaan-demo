@@ -1,0 +1,2158 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Persediaan UIN Ponorogo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .fade-in { animation: fadeIn 0.3s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .slide-in { animation: slideIn 0.3s ease-out; }
+        @keyframes slideIn { from { transform: translateX(-100%); } to { transform: translateX(0); } }
+        .print-only { display: none; }
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            body { background: white !important; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Login Screen -->
+    <div id="loginScreen" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-600 to-blue-700">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md fade-in">
+            <div class="text-center mb-8">
+                <div class="bg-green-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-boxes text-green-600 text-3xl"></i>
+                </div>
+                <h1 class="text-2xl font-bold text-gray-800">E-Persediaan</h1>
+                <p class="text-gray-600">UIN Ponorogo</p>
+            </div>
+            
+            <form id="loginForm" class="space-y-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Username</label>
+                    <input type="text" id="username" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="Masukkan username" required>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                    <input type="password" id="password" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="Masukkan password" required>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Login Sebagai</label>
+                    <select id="userType" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                        <option value="user">User</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition duration-200 font-medium">
+                    <i class="fas fa-sign-in-alt mr-2"></i>Login
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- User Dashboard -->
+    <div id="userDashboard" class="hidden">
+        <!-- Navigation -->
+        <nav class="bg-white shadow-lg border-b no-print">
+            <div class="max-w-7xl mx-auto px-4">
+                <div class="flex justify-between items-center py-4">
+                    <div class="flex items-center space-x-4">
+                        <div class="bg-green-100 w-10 h-10 rounded-full flex items-center justify-center">
+                            <i class="fas fa-boxes text-green-600"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-xl font-bold text-gray-800">E-Persediaan UIN Ponorogo</h1>
+                            <p class="text-sm text-gray-600">Dashboard User</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <div class="relative">
+                            <button id="cartBtn" class="bg-green-100 text-green-600 px-4 py-2 rounded-lg hover:bg-green-200 transition duration-200">
+                                <i class="fas fa-shopping-cart mr-2"></i>Keranjang
+                                <span id="cartCount" class="bg-red-500 text-white text-xs rounded-full px-2 py-1 ml-2">0</span>
+                            </button>
+                        </div>
+                        <button onclick="logout()" class="text-red-600 hover:text-red-800 transition duration-200">
+                            <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- User Tabs -->
+        <div class="max-w-7xl mx-auto px-4 py-6 no-print">
+            <div class="flex space-x-1 bg-gray-100 p-1 rounded-lg mb-6">
+                <button onclick="showUserTab('catalog')" class="user-tab-btn flex-1 py-2 px-4 rounded-md text-sm font-medium transition duration-200 bg-white text-green-600 shadow-sm">
+                    <i class="fas fa-th-large mr-2"></i>Katalog Barang
+                </button>
+                <button onclick="showUserTab('history')" class="user-tab-btn flex-1 py-2 px-4 rounded-md text-sm font-medium transition duration-200 text-gray-600 hover:text-gray-800">
+                    <i class="fas fa-history mr-2"></i>Riwayat Permintaan
+                </button>
+            </div>
+
+            <!-- Catalog Tab -->
+            <div id="catalogTab" class="user-tab-content">
+                <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Katalog Barang</h2>
+                    <div class="flex flex-col sm:flex-row gap-4 mb-6">
+                        <input type="text" id="searchItems" placeholder="Cari barang..." class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                        <select id="categoryFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                            <option value="">Semua Kategori</option>
+                            <option value="Alat Tulis">Alat Tulis</option>
+                            <option value="Elektronik">Elektronik</option>
+                            <option value="Furniture">Furniture</option>
+                            <option value="Kebersihan">Kebersihan</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="itemsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    <!-- Items will be populated here -->
+                </div>
+            </div>
+
+            <!-- History Tab -->
+            <div id="historyTab" class="user-tab-content hidden">
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6">Riwayat Permintaan</h2>
+                    <div id="requestHistory" class="space-y-4">
+                        <!-- History will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cart Modal -->
+        <div id="cartModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 no-print">
+            <div class="flex items-center justify-center min-h-screen p-4">
+                <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
+                    <div class="p-6 border-b">
+                        <div class="flex justify-between items-center">
+                            <h3 class="text-xl font-bold text-gray-800">Keranjang Permintaan</h3>
+                            <button onclick="closeCart()" class="text-gray-500 hover:text-gray-700">
+                                <i class="fas fa-times text-xl"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="p-6 overflow-y-auto max-h-96">
+                        <div id="cartItems" class="space-y-4">
+                            <!-- Cart items will be populated here -->
+                        </div>
+                    </div>
+                    <div class="p-6 border-t">
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Alasan Kebutuhan</label>
+                            <textarea id="requestReason" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" rows="3" placeholder="Jelaskan alasan kebutuhan barang..." required></textarea>
+                        </div>
+                        <div class="flex space-x-4">
+                            <button onclick="closeCart()" class="flex-1 bg-gray-300 text-gray-700 py-3 rounded-lg hover:bg-gray-400 transition duration-200">
+                                Batal
+                            </button>
+                            <button onclick="submitRequest()" class="flex-1 bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition duration-200">
+                                <i class="fas fa-paper-plane mr-2"></i>Kirim Permintaan
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div id="adminDashboard" class="hidden">
+        <!-- Navigation -->
+        <nav class="bg-white shadow-lg border-b no-print">
+            <div class="max-w-7xl mx-auto px-4">
+                <div class="flex justify-between items-center py-4">
+                    <div class="flex items-center space-x-4">
+                        <div class="bg-blue-100 w-10 h-10 rounded-full flex items-center justify-center">
+                            <i class="fas fa-user-shield text-blue-600"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-xl font-bold text-gray-800">E-Persediaan UIN Ponorogo</h1>
+                            <p class="text-sm text-gray-600">Dashboard Admin</p>
+                        </div>
+                    </div>
+                    <button onclick="logout()" class="text-red-600 hover:text-red-800 transition duration-200">
+                        <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Admin Tabs -->
+        <div class="max-w-7xl mx-auto px-4 py-6 no-print">
+            <div class="flex flex-wrap gap-1 bg-gray-100 p-1 rounded-lg mb-6">
+                <button onclick="showAdminTab('dashboard')" class="admin-tab-btn flex-1 min-w-max py-2 px-4 rounded-md text-sm font-medium transition duration-200 bg-white text-blue-600 shadow-sm">
+                    <i class="fas fa-chart-line mr-2"></i>Dashboard
+                </button>
+                <button onclick="showAdminTab('requests')" class="admin-tab-btn flex-1 min-w-max py-2 px-4 rounded-md text-sm font-medium transition duration-200 text-gray-600 hover:text-gray-800">
+                    <i class="fas fa-clipboard-list mr-2"></i>Pengajuan
+                </button>
+                <button onclick="showAdminTab('items')" class="admin-tab-btn flex-1 min-w-max py-2 px-4 rounded-md text-sm font-medium transition duration-200 text-gray-600 hover:text-gray-800">
+                    <i class="fas fa-boxes mr-2"></i>Kelola Barang
+                </button>
+                <button onclick="showAdminTab('reports')" class="admin-tab-btn flex-1 min-w-max py-2 px-4 rounded-md text-sm font-medium transition duration-200 text-gray-600 hover:text-gray-800">
+                    <i class="fas fa-file-alt mr-2"></i>Laporan
+                </button>
+                <button onclick="showAdminTab('users')" class="admin-tab-btn flex-1 min-w-max py-2 px-4 rounded-md text-sm font-medium transition duration-200 text-gray-600 hover:text-gray-800">
+                    <i class="fas fa-users mr-2"></i>Kelola User
+                </button>
+            </div>
+
+            <!-- Dashboard Tab -->
+            <div id="dashboardTab" class="admin-tab-content">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Total Barang</p>
+                                <p id="totalItems" class="text-3xl font-bold text-blue-600">0</p>
+                            </div>
+                            <div class="bg-blue-100 w-12 h-12 rounded-full flex items-center justify-center">
+                                <i class="fas fa-boxes text-blue-600"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Permintaan Pending</p>
+                                <p id="pendingRequests" class="text-3xl font-bold text-yellow-600">0</p>
+                            </div>
+                            <div class="bg-yellow-100 w-12 h-12 rounded-full flex items-center justify-center">
+                                <i class="fas fa-clock text-yellow-600"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Permintaan Disetujui</p>
+                                <p id="approvedRequests" class="text-3xl font-bold text-green-600">0</p>
+                            </div>
+                            <div class="bg-green-100 w-12 h-12 rounded-full flex items-center justify-center">
+                                <i class="fas fa-check text-green-600"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Total User</p>
+                                <p id="totalUsers" class="text-3xl font-bold text-purple-600">0</p>
+                            </div>
+                            <div class="bg-purple-100 w-12 h-12 rounded-full flex items-center justify-center">
+                                <i class="fas fa-users text-purple-600"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4">Permintaan Terbaru</h3>
+                        <div id="recentRequests" class="space-y-3">
+                            <!-- Recent requests will be populated here -->
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4">Stok Menipis</h3>
+                        <div id="lowStockItems" class="space-y-3">
+                            <!-- Low stock items will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Requests Tab -->
+            <div id="requestsTab" class="admin-tab-content hidden">
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800">Riwayat Pengajuan</h2>
+                        <select id="statusFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="">Semua Status</option>
+                            <option value="pending">Menunggu</option>
+                            <option value="approved">Disetujui</option>
+                            <option value="rejected">Ditolak</option>
+                        </select>
+                    </div>
+                    <div id="requestsList" class="space-y-4">
+                        <!-- Requests will be populated here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Items Tab -->
+            <div id="itemsTab" class="admin-tab-content hidden">
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800">Kelola Barang</h2>
+                        <button onclick="showAddItemModal()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-200">
+                            <i class="fas fa-plus mr-2"></i>Tambah Barang
+                        </button>
+                    </div>
+                    <div id="itemsList" class="overflow-x-auto">
+                        <!-- Items table will be populated here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reports Tab -->
+            <div id="reportsTab" class="admin-tab-content hidden">
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6">Laporan</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Tanggal Mulai</label>
+                            <input type="date" id="startDate" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Tanggal Akhir</label>
+                            <input type="date" id="endDate" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap gap-4 mb-6">
+                        <button onclick="generateReport('incoming')" class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition duration-200">
+                            <i class="fas fa-download mr-2"></i>Laporan Barang Masuk
+                        </button>
+                        <button onclick="generateReport('outgoing')" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition duration-200">
+                            <i class="fas fa-upload mr-2"></i>Laporan Barang Keluar
+                        </button>
+                        <button onclick="generateReport('inventory')" class="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition duration-200">
+                            <i class="fas fa-list mr-2"></i>Laporan Inventori
+                        </button>
+                    </div>
+                    <div id="reportContent" class="hidden">
+                        <!-- Report content will be populated here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Users Tab -->
+            <div id="usersTab" class="admin-tab-content hidden">
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800">Kelola User</h2>
+                        <button onclick="showAddUserModal()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-200">
+                            <i class="fas fa-user-plus mr-2"></i>Tambah User
+                        </button>
+                    </div>
+                    <div id="usersList" class="overflow-x-auto">
+                        <!-- Users table will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <!-- Add Item Modal -->
+    <div id="addItemModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 no-print">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-xl shadow-2xl w-full max-w-md">
+                <div class="p-6 border-b">
+                    <h3 class="text-xl font-bold text-gray-800">Tambah Barang Baru</h3>
+                </div>
+                <form id="addItemForm" class="p-6 space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Nama Barang</label>
+                        <input type="text" id="itemName" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Kategori</label>
+                        <select id="itemCategory" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                            <option value="">Pilih Kategori</option>
+                            <option value="Alat Tulis">Alat Tulis</option>
+                            <option value="Elektronik">Elektronik</option>
+                            <option value="Furniture">Furniture</option>
+                            <option value="Kebersihan">Kebersihan</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Stok</label>
+                        <input type="number" id="itemStock" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" min="0" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Satuan</label>
+                        <input type="text" id="itemUnit" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="pcs, box, kg, dll" required>
+                    </div>
+                    <div class="flex space-x-4 pt-4">
+                        <button type="button" onclick="closeAddItemModal()" class="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-400 transition duration-200">
+                            Batal
+                        </button>
+                        <button type="submit" class="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition duration-200">
+                            Simpan
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add User Modal -->
+    <div id="addUserModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 no-print">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-xl shadow-2xl w-full max-w-md">
+                <div class="p-6 border-b">
+                    <h3 class="text-xl font-bold text-gray-800">Tambah User Baru</h3>
+                </div>
+                <form id="addUserForm" class="p-6 space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Nama Lengkap</label>
+                        <input type="text" id="userFullName" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Username</label>
+                        <input type="text" id="userUsername" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                        <input type="password" id="userPassword" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Departemen</label>
+                        <input type="text" id="userDepartment" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Role</label>
+                        <select id="userRole" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                            <option value="user">User</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                    <div class="flex space-x-4 pt-4">
+                        <button type="button" onclick="closeAddUserModal()" class="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-400 transition duration-200">
+                            Batal
+                        </button>
+                        <button type="submit" class="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition duration-200">
+                            Simpan
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Request Action Modal -->
+    <div id="requestActionModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 no-print">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-xl shadow-2xl w-full max-w-md">
+                <div class="p-6 border-b">
+                    <h3 id="actionModalTitle" class="text-xl font-bold text-gray-800"></h3>
+                </div>
+                <div class="p-6">
+                    <div id="actionModalContent" class="mb-4"></div>
+                    <div id="rejectionReasonDiv" class="hidden mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Alasan Penolakan</label>
+                        <textarea id="rejectionReason" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent" rows="3" placeholder="Jelaskan alasan penolakan..."></textarea>
+                    </div>
+                    <div class="flex space-x-4">
+                        <button onclick="closeRequestActionModal()" class="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-400 transition duration-200">
+                            Batal
+                        </button>
+                        <button id="confirmActionBtn" class="flex-1 py-2 rounded-lg transition duration-200">
+                            Konfirmasi
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit User Modal -->
+    <div id="editUserModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 no-print">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-xl shadow-2xl w-full max-w-md">
+                <div class="p-6 border-b">
+                    <h3 class="text-xl font-bold text-gray-800">Edit User</h3>
+                </div>
+                <form id="editUserForm" class="p-6 space-y-4">
+                    <input type="hidden" id="editUserId">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Nama Lengkap</label>
+                        <input type="text" id="editUserFullName" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Username</label>
+                        <input type="text" id="editUserUsername" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Password Baru (kosongkan jika tidak diubah)</label>
+                        <input type="password" id="editUserPassword" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Departemen</label>
+                        <input type="text" id="editUserDepartment" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Role</label>
+                        <select id="editUserRole" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                            <option value="user">User</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                    <div class="flex space-x-4 pt-4">
+                        <button type="button" onclick="closeEditUserModal()" class="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-400 transition duration-200">
+                            Batal
+                        </button>
+                        <button type="submit" class="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition duration-200">
+                            Simpan
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Item Modal -->
+    <div id="editItemModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 no-print">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-xl shadow-2xl w-full max-w-md">
+                <div class="p-6 border-b">
+                    <h3 class="text-xl font-bold text-gray-800">Edit Barang</h3>
+                </div>
+                <form id="editItemForm" class="p-6 space-y-4">
+                    <input type="hidden" id="editItemId">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Nama Barang</label>
+                        <input type="text" id="editItemName" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Kategori</label>
+                        <select id="editItemCategory" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                            <option value="">Pilih Kategori</option>
+                            <option value="Alat Tulis">Alat Tulis</option>
+                            <option value="Elektronik">Elektronik</option>
+                            <option value="Furniture">Furniture</option>
+                            <option value="Kebersihan">Kebersihan</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Stok</label>
+                        <input type="number" id="editItemStock" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" min="0" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Satuan</label>
+                        <input type="text" id="editItemUnit" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="pcs, box, kg, dll" required>
+                    </div>
+                    <div class="flex space-x-4 pt-4">
+                        <button type="button" onclick="closeEditItemModal()" class="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-400 transition duration-200">
+                            Batal
+                        </button>
+                        <button type="submit" class="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition duration-200">
+                            Simpan
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirm Delete Modal -->
+    <div id="confirmDeleteModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 no-print">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-xl shadow-2xl w-full max-w-md">
+                <div class="p-6 border-b">
+                    <h3 class="text-xl font-bold text-gray-800">Konfirmasi Hapus</h3>
+                </div>
+                <div class="p-6">
+                    <div id="deleteModalContent" class="mb-6">
+                        <!-- Delete confirmation content will be populated here -->
+                    </div>
+                    <div class="flex space-x-4">
+                        <button onclick="closeConfirmDeleteModal()" class="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-400 transition duration-200">
+                            Batal
+                        </button>
+                        <button id="confirmDeleteBtn" class="flex-1 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition duration-200">
+                            Hapus
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Print Modal -->
+    <div id="printModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
+                <div class="p-6 border-b no-print">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-xl font-bold text-gray-800">Preview Dokumen</h3>
+                        <div class="flex space-x-2">
+                            <button onclick="printDocument()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-200">
+                                <i class="fas fa-print mr-2"></i>Cetak
+                            </button>
+                            <button onclick="closePrintModal()" class="text-gray-500 hover:text-gray-700">
+                                <i class="fas fa-times text-xl"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div id="printContent" class="p-6 overflow-y-auto max-h-[70vh]">
+                    <!-- Print content will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let currentUser = null;
+        let currentUserType = null;
+        let items = [];
+        let users = [];
+        let requests = [];
+        let cart = [];
+        
+        // Google Apps Script Configuration
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwk-IOhcifOHSqrSF-Id6Nd5xbxiZc1fwfY8VYViCKzKwxUvwYI4icPFuhpREMaWZ380g/exec';
+        let isOnline = true;
+        let syncQueue = [];
+        
+        // Cache management
+        const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+        let lastSync = {
+            items: 0,
+            users: 0,
+            requests: 0
+        };
+
+        // Google Sheets API Functions
+        async function callGoogleSheets(action, data = {}) {
+            try {
+                showLoadingIndicator();
+                
+                const response = await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: action,
+                        data: data,
+                        timestamp: Date.now()
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                hideLoadingIndicator();
+                
+                if (!result.success) {
+                    throw new Error(result.error || 'Unknown error');
+                }
+                
+                return result;
+            } catch (error) {
+                hideLoadingIndicator();
+                console.error('Google Sheets API Error:', error);
+                
+                if (!navigator.onLine || 
+                    error.message.includes('Failed to fetch') ||
+                    error.message.includes('CORS') ||
+                    error.message.includes('NetworkError')) {
+                    isOnline = false;
+                    addToSyncQueue(action, data);
+                    showOfflineMessage();
+                    return null;
+                }
+                
+                throw error;
+            }
+        }
+        
+        // Sync Queue Management
+        function addToSyncQueue(action, data) {
+            syncQueue.push({
+                action: action,
+                data: data,
+                timestamp: Date.now()
+            });
+        }
+        
+        async function processSyncQueue() {
+            if (!isOnline || syncQueue.length === 0) return;
+            
+            const queueCopy = [...syncQueue];
+            syncQueue = [];
+            
+            for (const item of queueCopy) {
+                try {
+                    await callGoogleSheets(item.action, item.data);
+                } catch (error) {
+                    addToSyncQueue(item.action, item.data);
+                }
+            }
+        }
+        
+        // Data Loading Functions
+        async function loadAllData() {
+            try {
+                showLoadingIndicator('Memuat data...');
+                
+                const [itemsResult, usersResult, requestsResult] = await Promise.all([
+                    loadItems(),
+                    loadUsers(),
+                    loadRequests()
+                ]);
+                
+                hideLoadingIndicator();
+                return true;
+            } catch (error) {
+                hideLoadingIndicator();
+                console.error('Error loading data:', error);
+                showErrorMessage('Gagal memuat data dari server.');
+                return false;
+            }
+        }
+        
+        async function loadItems() {
+            const now = Date.now();
+            if (now - lastSync.items < CACHE_DURATION && items.length > 0) {
+                return items;
+            }
+            
+            const result = await callGoogleSheets('getItems');
+            if (result && result.data) {
+                items = result.data;
+                lastSync.items = now;
+            }
+            return items;
+        }
+        
+        async function loadUsers() {
+            const now = Date.now();
+            if (now - lastSync.users < CACHE_DURATION && users.length > 0) {
+                return users;
+            }
+            
+            const result = await callGoogleSheets('getUsers');
+            if (result && result.data) {
+                users = result.data;
+                lastSync.users = now;
+            }
+            return users;
+        }
+        
+        async function loadRequests() {
+            const now = Date.now();
+            if (now - lastSync.requests < CACHE_DURATION && requests.length > 0) {
+                return requests;
+            }
+            
+            const result = await callGoogleSheets('getRequests');
+            if (result && result.data) {
+                requests = result.data;
+                lastSync.requests = now;
+            }
+            return requests;
+        }
+        
+        // Data Saving Functions
+        async function saveItem(item, isUpdate = false) {
+            const action = isUpdate ? 'updateItem' : 'addItem';
+            const result = await callGoogleSheets(action, item);
+            
+            if (result) {
+                if (isUpdate) {
+                    const index = items.findIndex(i => i.id === item.id);
+                    if (index !== -1) items[index] = item;
+                } else {
+                    item.id = result.data.id || Date.now();
+                    items.push(item);
+                }
+            }
+            
+            return result;
+        }
+        
+        async function saveUser(user, isUpdate = false) {
+            const action = isUpdate ? 'updateUser' : 'addUser';
+            const result = await callGoogleSheets(action, user);
+            
+            if (result) {
+                if (isUpdate) {
+                    const index = users.findIndex(u => u.id === user.id);
+                    if (index !== -1) users[index] = user;
+                } else {
+                    user.id = result.data.id || Date.now();
+                    users.push(user);
+                }
+            }
+            
+            return result;
+        }
+        
+        async function saveRequest(request, isUpdate = false) {
+            const action = isUpdate ? 'updateRequest' : 'addRequest';
+            const result = await callGoogleSheets(action, request);
+            
+            if (result) {
+                if (isUpdate) {
+                    const index = requests.findIndex(r => r.id === request.id);
+                    if (index !== -1) requests[index] = request;
+                } else {
+                    request.id = result.data.id || Date.now();
+                    requests.push(request);
+                }
+            }
+            
+            return result;
+        }
+        
+        async function deleteItemById(itemId) {
+            const result = await callGoogleSheets('deleteItem', { id: itemId });
+            
+            if (result) {
+                items = items.filter(i => i.id !== itemId);
+            }
+            
+            return result;
+        }
+        
+        async function deleteUserById(userId) {
+            const result = await callGoogleSheets('deleteUser', { id: userId });
+            
+            if (result) {
+                users = users.filter(u => u.id !== userId);
+            }
+            
+            return result;
+        }
+
+        // UI Helper Functions
+        function showLoadingIndicator(message = 'Memuat...') {
+            let loader = document.getElementById('loadingIndicator');
+            if (!loader) {
+                loader = document.createElement('div');
+                loader.id = 'loadingIndicator';
+                loader.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+                loader.innerHTML = `
+                    <div class="bg-white rounded-lg p-6 flex items-center space-x-4">
+                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                        <span class="text-gray-700 font-medium">${message}</span>
+                    </div>
+                `;
+                document.body.appendChild(loader);
+            } else {
+                loader.querySelector('span').textContent = message;
+                loader.classList.remove('hidden');
+            }
+        }
+        
+        function hideLoadingIndicator() {
+            const loader = document.getElementById('loadingIndicator');
+            if (loader) {
+                loader.classList.add('hidden');
+            }
+        }
+        
+        function showOfflineMessage() {
+            showMessage('Mode Offline - Data akan disinkronkan saat online kembali', 'warning');
+        }
+        
+        function showErrorMessage(message) {
+            showMessage(message, 'error');
+        }
+        
+        function showSuccessMessage(message) {
+            showMessage(message, 'success');
+        }
+        
+        function showMessage(message, type = 'info') {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 fade-in ${getMessageClass(type)}`;
+            messageDiv.innerHTML = `
+                <div class="flex items-center space-x-2">
+                    <i class="fas ${getMessageIcon(type)}"></i>
+                    <span>${message}</span>
+                    <button onclick="this.parentElement.parentElement.remove()" class="ml-2 text-white hover:text-gray-200">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            document.body.appendChild(messageDiv);
+            
+            setTimeout(() => {
+                if (messageDiv.parentNode) {
+                    messageDiv.remove();
+                }
+            }, 5000);
+        }
+        
+        function getMessageClass(type) {
+            switch(type) {
+                case 'success': return 'bg-green-500 text-white';
+                case 'error': return 'bg-red-500 text-white';
+                case 'warning': return 'bg-yellow-500 text-white';
+                default: return 'bg-blue-500 text-white';
+            }
+        }
+        
+        function getMessageIcon(type) {
+            switch(type) {
+                case 'success': return 'fa-check-circle';
+                case 'error': return 'fa-exclamation-circle';
+                case 'warning': return 'fa-exclamation-triangle';
+                default: return 'fa-info-circle';
+            }
+        }
+        
+        // Connection Status Management
+        function checkOnlineStatus() {
+            const wasOnline = isOnline;
+            isOnline = navigator.onLine;
+            
+            if (!wasOnline && isOnline) {
+                showSuccessMessage('Koneksi kembali online - Menyinkronkan data...');
+                processSyncQueue();
+                loadAllData();
+            } else if (wasOnline && !isOnline) {
+                showOfflineMessage();
+            }
+        }
+
+        // Authentication
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const userType = document.getElementById('userType').value;
+            
+            showLoadingIndicator('Memverifikasi login...');
+            
+            try {
+                if (users.length === 0) {
+                    await loadUsers();
+                }
+                
+                const user = users.find(u => u.username === username && u.password === password && u.role === userType);
+                
+                if (user) {
+                    currentUser = user;
+                    currentUserType = userType;
+                    
+                    await loadAllData();
+                    
+                    document.getElementById('loginScreen').classList.add('hidden');
+                    
+                    if (userType === 'admin') {
+                        document.getElementById('adminDashboard').classList.remove('hidden');
+                        showAdminTab('dashboard');
+                    } else {
+                        document.getElementById('userDashboard').classList.remove('hidden');
+                        showUserTab('catalog');
+                    }
+                    
+                    updateDashboard();
+                    showSuccessMessage('Login berhasil!');
+                } else {
+                    showErrorMessage('Username atau password salah!');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                showErrorMessage('Gagal melakukan login. Silakan coba lagi.');
+            } finally {
+                hideLoadingIndicator();
+            }
+        });
+
+        function logout() {
+            currentUser = null;
+            currentUserType = null;
+            cart = [];
+            
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('userDashboard').classList.add('hidden');
+            document.getElementById('adminDashboard').classList.add('hidden');
+            
+            document.getElementById('loginForm').reset();
+        }
+
+        // User Dashboard Functions
+        function showUserTab(tabName) {
+            document.querySelectorAll('.user-tab-content').forEach(tab => {
+                tab.classList.add('hidden');
+            });
+            
+            document.querySelectorAll('.user-tab-btn').forEach(btn => {
+                btn.classList.remove('bg-white', 'text-green-600', 'shadow-sm');
+                btn.classList.add('text-gray-600', 'hover:text-gray-800');
+            });
+            
+            document.getElementById(tabName + 'Tab').classList.remove('hidden');
+            
+            event.target.classList.add('bg-white', 'text-green-600', 'shadow-sm');
+            event.target.classList.remove('text-gray-600', 'hover:text-gray-800');
+            
+            if (tabName === 'catalog') {
+                renderItemsCatalog();
+            } else if (tabName === 'history') {
+                renderUserHistory();
+            }
+        }
+
+        function renderItemsCatalog() {
+            const grid = document.getElementById('itemsGrid');
+            const searchTerm = document.getElementById('searchItems').value.toLowerCase();
+            const categoryFilter = document.getElementById('categoryFilter').value;
+            
+            let filteredItems = items.filter(item => {
+                const matchesSearch = item.name.toLowerCase().includes(searchTerm);
+                const matchesCategory = !categoryFilter || item.category === categoryFilter;
+                return matchesSearch && matchesCategory && item.stock > 0;
+            });
+            
+            grid.innerHTML = filteredItems.map(item => `
+                <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition duration-300">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="bg-green-100 w-12 h-12 rounded-full flex items-center justify-center">
+                            <i class="fas fa-box text-green-600"></i>
+                        </div>
+                        <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">${item.category}</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-800 mb-2">${item.name}</h3>
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="text-sm text-gray-600">Stok: <span class="font-medium ${item.stock <= item.minStock ? 'text-red-600' : 'text-green-600'}">${item.stock} ${item.unit}</span></span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <input type="number" id="qty_${item.id}" min="1" max="${item.stock}" value="1" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm">
+                        <button onclick="addToCart(${item.id})" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition duration-200 text-sm">
+                            <i class="fas fa-cart-plus"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function addToCart(itemId) {
+            const item = items.find(i => i.id === itemId);
+            const quantity = parseInt(document.getElementById(`qty_${itemId}`).value);
+            
+            if (quantity > item.stock) {
+                alert('Jumlah melebihi stok yang tersedia!');
+                return;
+            }
+            
+            const existingCartItem = cart.find(c => c.id === itemId);
+            
+            if (existingCartItem) {
+                if (existingCartItem.quantity + quantity > item.stock) {
+                    alert('Total jumlah di keranjang melebihi stok yang tersedia!');
+                    return;
+                }
+                existingCartItem.quantity += quantity;
+            } else {
+                cart.push({
+                    id: itemId,
+                    name: item.name,
+                    quantity: quantity,
+                    unit: item.unit,
+                    maxStock: item.stock
+                });
+            }
+            
+            updateCartCount();
+            document.getElementById(`qty_${itemId}`).value = 1;
+            
+            const btn = event.target;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-check"></i>';
+            btn.classList.add('bg-green-700');
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                btn.classList.remove('bg-green-700');
+            }, 1000);
+        }
+
+        function updateCartCount() {
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            document.getElementById('cartCount').textContent = totalItems;
+        }
+
+        function openCart() {
+            document.getElementById('cartModal').classList.remove('hidden');
+            renderCartItems();
+        }
+
+        function closeCart() {
+            document.getElementById('cartModal').classList.add('hidden');
+        }
+
+        function renderCartItems() {
+            const cartItemsDiv = document.getElementById('cartItems');
+            
+            if (cart.length === 0) {
+                cartItemsDiv.innerHTML = '<p class="text-gray-500 text-center py-8">Keranjang kosong</p>';
+                return;
+            }
+            
+            cartItemsDiv.innerHTML = cart.map(item => `
+                <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                    <div class="flex-1">
+                        <h4 class="font-medium text-gray-800">${item.name}</h4>
+                        <p class="text-sm text-gray-600">${item.quantity} ${item.unit}</p>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="updateCartQuantity(${item.id}, -1)" class="bg-red-100 text-red-600 w-8 h-8 rounded-full hover:bg-red-200 transition duration-200">
+                            <i class="fas fa-minus text-xs"></i>
+                        </button>
+                        <span class="w-8 text-center font-medium">${item.quantity}</span>
+                        <button onclick="updateCartQuantity(${item.id}, 1)" class="bg-green-100 text-green-600 w-8 h-8 rounded-full hover:bg-green-200 transition duration-200">
+                            <i class="fas fa-plus text-xs"></i>
+                        </button>
+                        <button onclick="removeFromCart(${item.id})" class="bg-red-100 text-red-600 w-8 h-8 rounded-full hover:bg-red-200 transition duration-200 ml-2">
+                            <i class="fas fa-trash text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateCartQuantity(itemId, change) {
+            const cartItem = cart.find(c => c.id === itemId);
+            const newQuantity = cartItem.quantity + change;
+            
+            if (newQuantity <= 0) {
+                removeFromCart(itemId);
+                return;
+            }
+            
+            if (newQuantity > cartItem.maxStock) {
+                alert('Jumlah melebihi stok yang tersedia!');
+                return;
+            }
+            
+            cartItem.quantity = newQuantity;
+            updateCartCount();
+            renderCartItems();
+        }
+
+        function removeFromCart(itemId) {
+            cart = cart.filter(c => c.id !== itemId);
+            updateCartCount();
+            renderCartItems();
+        }
+
+        async function submitRequest() {
+            if (cart.length === 0) {
+                showErrorMessage('Keranjang kosong!');
+                return;
+            }
+            
+            const reason = document.getElementById('requestReason').value.trim();
+            if (!reason) {
+                showErrorMessage('Harap isi alasan kebutuhan!');
+                return;
+            }
+            
+            const newRequest = {
+                userId: currentUser.id,
+                userName: currentUser.fullName,
+                items: [...cart],
+                reason: reason,
+                status: 'pending',
+                date: new Date().toISOString(),
+                processedBy: null,
+                processedDate: null,
+                rejectionReason: null
+            };
+            
+            try {
+                showLoadingIndicator('Mengirim permintaan...');
+                
+                const result = await saveRequest(newRequest);
+                
+                if (result || !isOnline) {
+                    cart.forEach(cartItem => {
+                        const item = items.find(i => i.id === cartItem.id);
+                        if (item) {
+                            item.stock -= cartItem.quantity;
+                        }
+                    });
+                    
+                    cart = [];
+                    updateCartCount();
+                    closeCart();
+                    document.getElementById('requestReason').value = '';
+                    
+                    renderItemsCatalog();
+                    
+                    showSuccessMessage('Permintaan berhasil dikirim!');
+                } else {
+                    showErrorMessage('Gagal mengirim permintaan. Silakan coba lagi.');
+                }
+            } catch (error) {
+                console.error('Submit request error:', error);
+                showErrorMessage('Gagal mengirim permintaan. Silakan coba lagi.');
+            } finally {
+                hideLoadingIndicator();
+            }
+        }
+
+        function renderUserHistory() {
+            const historyDiv = document.getElementById('requestHistory');
+            const userRequests = requests.filter(r => r.userId === currentUser.id);
+            
+            if (userRequests.length === 0) {
+                historyDiv.innerHTML = '<p class="text-gray-500 text-center py-8">Belum ada riwayat permintaan</p>';
+                return;
+            }
+            
+            historyDiv.innerHTML = userRequests.map(request => `
+                <div class="border border-gray-200 rounded-lg p-6">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h4 class="font-bold text-gray-800">Permintaan #${request.id}</h4>
+                            <p class="text-sm text-gray-600">${new Date(request.date).toLocaleDateString('id-ID')}</p>
+                        </div>
+                        <span class="px-3 py-1 rounded-full text-sm font-medium ${getStatusBadgeClass(request.status)}">
+                            ${getStatusText(request.status)}
+                        </span>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h5 class="font-medium text-gray-800 mb-2">Barang yang diminta:</h5>
+                        <ul class="space-y-1">
+                            ${request.items.map(item => `
+                                <li class="text-sm text-gray-600">• ${item.name} - ${item.quantity} ${item.unit}</li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h5 class="font-medium text-gray-800 mb-1">Alasan:</h5>
+                        <p class="text-sm text-gray-600">${request.reason}</p>
+                    </div>
+                    
+                    ${request.status === 'rejected' ? `
+                        <div class="mb-4">
+                            <h5 class="font-medium text-red-800 mb-1">Alasan Penolakan:</h5>
+                            <p class="text-sm text-red-600">${request.rejectionReason}</p>
+                        </div>
+                    ` : ''}
+                    
+                    ${request.status === 'approved' ? `
+                        <button onclick="printApprovalLetter(${request.id})" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition duration-200">
+                            <i class="fas fa-print mr-2"></i>Cetak Lembar Persetujuan
+                        </button>
+                    ` : ''}
+                </div>
+            `).join('');
+        }
+
+        // Admin Dashboard Functions
+        function showAdminTab(tabName) {
+            document.querySelectorAll('.admin-tab-content').forEach(tab => {
+                tab.classList.add('hidden');
+            });
+            
+            document.querySelectorAll('.admin-tab-btn').forEach(btn => {
+                btn.classList.remove('bg-white', 'text-blue-600', 'shadow-sm');
+                btn.classList.add('text-gray-600', 'hover:text-gray-800');
+            });
+            
+            document.getElementById(tabName + 'Tab').classList.remove('hidden');
+            
+            event.target.classList.add('bg-white', 'text-blue-600', 'shadow-sm');
+            event.target.classList.remove('text-gray-600', 'hover:text-gray-800');
+            
+            if (tabName === 'dashboard') {
+                updateDashboardStats();
+            } else if (tabName === 'requests') {
+                renderRequestsList();
+            } else if (tabName === 'items') {
+                renderItemsList();
+            } else if (tabName === 'users') {
+                renderUsersList();
+            }
+        }
+
+        function updateDashboard() {
+            if (currentUserType === 'admin') {
+                updateDashboardStats();
+            }
+        }
+
+        function updateDashboardStats() {
+            document.getElementById('totalItems').textContent = items.length;
+            document.getElementById('pendingRequests').textContent = requests.filter(r => r.status === 'pending').length;
+            document.getElementById('approvedRequests').textContent = requests.filter(r => r.status === 'approved').length;
+            document.getElementById('totalUsers').textContent = users.filter(u => u.role === 'user').length;
+            
+            renderRecentRequests();
+            renderLowStockItems();
+        }
+
+        function renderRecentRequests() {
+            const recentDiv = document.getElementById('recentRequests');
+            const recentRequests = requests.slice(-5).reverse();
+            
+            if (recentRequests.length === 0) {
+                recentDiv.innerHTML = '<p class="text-gray-500 text-sm">Belum ada permintaan</p>';
+                return;
+            }
+            
+            recentDiv.innerHTML = recentRequests.map(request => `
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div>
+                        <p class="font-medium text-gray-800 text-sm">${request.userName}</p>
+                        <p class="text-xs text-gray-600">${request.items.length} item</p>
+                    </div>
+                    <span class="px-2 py-1 rounded-full text-xs font-medium ${getStatusBadgeClass(request.status)}">
+                        ${getStatusText(request.status)}
+                    </span>
+                </div>
+            `).join('');
+        }
+
+        function renderLowStockItems() {
+            const lowStockDiv = document.getElementById('lowStockItems');
+            const lowStockItems = items.filter(item => item.stock <= item.minStock);
+            
+            if (lowStockItems.length === 0) {
+                lowStockDiv.innerHTML = '<p class="text-gray-500 text-sm">Semua stok aman</p>';
+                return;
+            }
+            
+            lowStockDiv.innerHTML = lowStockItems.map(item => `
+                <div class="flex items-center justify-between p-3 bg-red-50 rounded-lg">
+                    <div>
+                        <p class="font-medium text-gray-800 text-sm">${item.name}</p>
+                        <p class="text-xs text-gray-600">${item.category}</p>
+                    </div>
+                    <span class="text-red-600 font-medium text-sm">${item.stock} ${item.unit}</span>
+                </div>
+            `).join('');
+        }
+
+        function renderRequestsList() {
+            const requestsDiv = document.getElementById('requestsList');
+            const statusFilter = document.getElementById('statusFilter').value;
+            
+            let filteredRequests = requests;
+            if (statusFilter) {
+                filteredRequests = requests.filter(r => r.status === statusFilter);
+            }
+            
+            if (filteredRequests.length === 0) {
+                requestsDiv.innerHTML = '<p class="text-gray-500 text-center py-8">Tidak ada permintaan</p>';
+                return;
+            }
+            
+            requestsDiv.innerHTML = filteredRequests.map(request => `
+                <div class="border border-gray-200 rounded-lg p-6">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h4 class="font-bold text-gray-800">Permintaan #${request.id}</h4>
+                            <p class="text-sm text-gray-600">Oleh: ${request.userName}</p>
+                            <p class="text-sm text-gray-600">${new Date(request.date).toLocaleDateString('id-ID')}</p>
+                        </div>
+                        <span class="px-3 py-1 rounded-full text-sm font-medium ${getStatusBadgeClass(request.status)}">
+                            ${getStatusText(request.status)}
+                        </span>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h5 class="font-medium text-gray-800 mb-2">Barang yang diminta:</h5>
+                        <ul class="space-y-1">
+                            ${request.items.map(item => `
+                                <li class="text-sm text-gray-600">• ${item.name} - ${item.quantity} ${item.unit}</li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h5 class="font-medium text-gray-800 mb-1">Alasan:</h5>
+                        <p class="text-sm text-gray-600">${request.reason}</p>
+                    </div>
+                    
+                    ${request.status === 'rejected' ? `
+                        <div class="mb-4">
+                            <h5 class="font-medium text-red-800 mb-1">Alasan Penolakan:</h5>
+                            <p class="text-sm text-red-600">${request.rejectionReason}</p>
+                        </div>
+                    ` : ''}
+                    
+                    ${request.processedBy ? `
+                        <div class="mb-4">
+                            <p class="text-sm text-gray-600">Diproses oleh: ${request.processedBy} pada ${new Date(request.processedDate).toLocaleDateString('id-ID')}</p>
+                        </div>
+                    ` : ''}
+                    
+                    ${request.status === 'pending' ? `
+                        <div class="flex space-x-2">
+                            <button onclick="processRequest(${request.id}, 'approve')" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition duration-200">
+                                <i class="fas fa-check mr-2"></i>Setujui
+                            </button>
+                            <button onclick="processRequest(${request.id}, 'reject')" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition duration-200">
+                                <i class="fas fa-times mr-2"></i>Tolak
+                            </button>
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+        }
+
+        function processRequest(requestId, action) {
+            const request = requests.find(r => r.id === requestId);
+            
+            document.getElementById('actionModalTitle').textContent = action === 'approve' ? 'Setujui Permintaan' : 'Tolak Permintaan';
+            document.getElementById('actionModalContent').innerHTML = `
+                <p class="text-gray-600 mb-2">Permintaan #${requestId} oleh ${request.userName}</p>
+                <div class="text-sm text-gray-600">
+                    <strong>Barang:</strong>
+                    <ul class="mt-1">
+                        ${request.items.map(item => `<li>• ${item.name} - ${item.quantity} ${item.unit}</li>`).join('')}
+                    </ul>
+                </div>
+            `;
+            
+            if (action === 'reject') {
+                document.getElementById('rejectionReasonDiv').classList.remove('hidden');
+                document.getElementById('confirmActionBtn').className = 'flex-1 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition duration-200';
+                document.getElementById('confirmActionBtn').textContent = 'Tolak Permintaan';
+            } else {
+                document.getElementById('rejectionReasonDiv').classList.add('hidden');
+                document.getElementById('confirmActionBtn').className = 'flex-1 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition duration-200';
+                document.getElementById('confirmActionBtn').textContent = 'Setujui Permintaan';
+            }
+            
+            document.getElementById('confirmActionBtn').onclick = () => confirmRequestAction(requestId, action);
+            document.getElementById('requestActionModal').classList.remove('hidden');
+        }
+
+        async function confirmRequestAction(requestId, action) {
+            const request = requests.find(r => r.id === requestId);
+            
+            if (action === 'reject') {
+                const rejectionReason = document.getElementById('rejectionReason').value.trim();
+                if (!rejectionReason) {
+                    alert('Harap isi alasan penolakan!');
+                    return;
+                }
+                
+                request.status = 'rejected';
+                request.rejectionReason = rejectionReason;
+                
+                request.items.forEach(requestItem => {
+                    const item = items.find(i => i.id === requestItem.id);
+                    item.stock += requestItem.quantity;
+                });
+                
+            } else {
+                request.status = 'approved';
+            }
+            
+            request.processedBy = currentUser.fullName;
+            request.processedDate = new Date().toISOString();
+            
+            try {
+                showLoadingIndicator('Memproses permintaan...');
+                
+                const result = await saveRequest(request, true);
+                
+                if (result || !isOnline) {
+                    closeRequestActionModal();
+                    renderRequestsList();
+                    updateDashboardStats();
+                    
+                    showSuccessMessage(`Permintaan berhasil ${action === 'approve' ? 'disetujui' : 'ditolak'}!`);
+                } else {
+                    showErrorMessage('Gagal memproses permintaan. Silakan coba lagi.');
+                }
+            } catch (error) {
+                console.error('Process request error:', error);
+                showErrorMessage('Gagal memproses permintaan. Silakan coba lagi.');
+            } finally {
+                hideLoadingIndicator();
+            }
+        }
+
+        function closeRequestActionModal() {
+            document.getElementById('requestActionModal').classList.add('hidden');
+            document.getElementById('rejectionReason').value = '';
+        }
+
+        function renderItemsList() {
+            const itemsDiv = document.getElementById('itemsList');
+            
+            itemsDiv.innerHTML = `
+                <table class="w-full">
+                    <thead>
+                        <tr class="bg-gray-50">
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Barang</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kategori</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stok</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Satuan</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        ${items.map(item => `
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${item.name}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${item.category}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm ${item.stock <= item.minStock ? 'text-red-600 font-medium' : 'text-gray-900'}">${item.stock}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${item.unit}</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${item.stock <= item.minStock ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}">
+                                        ${item.stock <= item.minStock ? 'Stok Menipis' : 'Stok Aman'}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                                    <button onclick="editItem(${item.id})" class="text-blue-600 hover:text-blue-900">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button onclick="deleteItem(${item.id})" class="text-red-600 hover:text-red-900">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        function showAddItemModal() {
+            document.getElementById('addItemModal').classList.remove('hidden');
+        }
+
+        function closeAddItemModal() {
+            document.getElementById('addItemModal').classList.add('hidden');
+            document.getElementById('addItemForm').reset();
+        }
+
+        document.getElementById('addItemForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const newItem = {
+                name: document.getElementById('itemName').value,
+                category: document.getElementById('itemCategory').value,
+                stock: parseInt(document.getElementById('itemStock').value),
+                unit: document.getElementById('itemUnit').value,
+                minStock: Math.max(1, Math.floor(parseInt(document.getElementById('itemStock').value) * 0.2))
+            };
+            
+            try {
+                showLoadingIndicator('Menambahkan barang...');
+                
+                const result = await saveItem(newItem);
+                
+                if (result || !isOnline) {
+                    closeAddItemModal();
+                    renderItemsList();
+                    updateDashboardStats();
+                    showSuccessMessage('Barang berhasil ditambahkan!');
+                } else {
+                    showErrorMessage('Gagal menambahkan barang. Silakan coba lagi.');
+                }
+            } catch (error) {
+                console.error('Add item error:', error);
+                showErrorMessage('Gagal menambahkan barang. Silakan coba lagi.');
+            } finally {
+                hideLoadingIndicator();
+            }
+        });
+
+        function editItem(itemId) {
+            const item = items.find(i => i.id === itemId);
+            
+            document.getElementById('editItemId').value = item.id;
+            document.getElementById('editItemName').value = item.name;
+            document.getElementById('editItemCategory').value = item.category;
+            document.getElementById('editItemStock').value = item.stock;
+            document.getElementById('editItemUnit').value = item.unit;
+            
+            document.getElementById('editItemModal').classList.remove('hidden');
+        }
+
+        function closeEditItemModal() {
+            document.getElementById('editItemModal').classList.add('hidden');
+            document.getElementById('editItemForm').reset();
+        }
+
+        function deleteItem(itemId) {
+            const item = items.find(i => i.id === itemId);
+            
+            document.getElementById('deleteModalContent').innerHTML = `
+                <div class="text-center">
+                    <div class="bg-red-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-exclamation-triangle text-red-600 text-2xl"></i>
+                    </div>
+                    <p class="text-gray-800 mb-2">Apakah Anda yakin ingin menghapus barang ini?</p>
+                    <p class="font-medium text-gray-900">${item.name}</p>
+                    <p class="text-sm text-gray-600">Kategori: ${item.category}</p>
+                    <p class="text-sm text-gray-600">Stok: ${item.stock} ${item.unit}</p>
+                </div>
+            `;
+            
+            document.getElementById('confirmDeleteBtn').onclick = () => confirmDeleteItem(itemId);
+            document.getElementById('confirmDeleteModal').classList.remove('hidden');
+        }
+
+        async function confirmDeleteItem(itemId) {
+            try {
+                showLoadingIndicator('Menghapus barang...');
+                
+                const result = await deleteItemById(itemId);
+                
+                if (result || !isOnline) {
+                    renderItemsList();
+                    updateDashboardStats();
+                    closeConfirmDeleteModal();
+                    showSuccessMessage('Barang berhasil dihapus!');
+                } else {
+                    showErrorMessage('Gagal menghapus barang. Silakan coba lagi.');
+                }
+            } catch (error) {
+                console.error('Delete item error:', error);
+                showErrorMessage('Gagal menghapus barang. Silakan coba lagi.');
+            } finally {
+                hideLoadingIndicator();
+            }
+        }
+
+        function renderUsersList() {
+            const usersDiv = document.getElementById('usersList');
+            
+            usersDiv.innerHTML = `
+                <table class="w-full">
+                    <thead>
+                        <tr class="bg-gray-50">
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Lengkap</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Username</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Departemen</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        ${users.map(user => `
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${user.fullName}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${user.username}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${user.department}</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${user.role === 'admin' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}">
+                                        ${user.role === 'admin' ? 'Admin' : 'User'}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                                    <button onclick="editUser(${user.id})" class="text-blue-600 hover:text-blue-900">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    ${user.id !== currentUser.id ? `
+                                        <button onclick="deleteUser(${user.id})" class="text-red-600 hover:text-red-900">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    ` : ''}
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        function showAddUserModal() {
+            document.getElementById('addUserModal').classList.remove('hidden');
+        }
+
+        function closeAddUserModal() {
+            document.getElementById('addUserModal').classList.add('hidden');
+            document.getElementById('addUserForm').reset();
+        }
+
+        document.getElementById('addUserForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('userUsername').value;
+            if (users.find(u => u.username === username)) {
+                alert('Username sudah digunakan!');
+                return;
+            }
+            
+            const newUser = {
+                fullName: document.getElementById('userFullName').value,
+                username: username,
+                password: document.getElementById('userPassword').value,
+                department: document.getElementById('userDepartment').value,
+                role: document.getElementById('userRole').value
+            };
+            
+            try {
+                showLoadingIndicator('Menambahkan user...');
+                
+                const result = await saveUser(newUser);
+                
+                if (result || !isOnline) {
+                    closeAddUserModal();
+                    renderUsersList();
+                    updateDashboardStats();
+                    showSuccessMessage('User berhasil ditambahkan!');
+                } else {
+                    showErrorMessage('Gagal menambahkan user. Silakan coba lagi.');
+                }
+            } catch (error) {
+                console.error('Add user error:', error);
+                showErrorMessage('Gagal menambahkan user. Silakan coba lagi.');
+            } finally {
+                hideLoadingIndicator();
+            }
+        });
+
+        function editUser(userId) {
+            const user = users.find(u => u.id === userId);
+            
+            document.getElementById('editUserId').value = user.id;
+            document.getElementById('editUserFullName').value = user.fullName;
+            document.getElementById('editUserUsername').value = user.username;
+            document.getElementById('editUserPassword').value = '';
+            document.getElementById('editUserDepartment').value = user.department;
+            document.getElementById('editUserRole').value = user.role;
+            
+            document.getElementById('editUserModal').classList.remove('hidden');
+        }
+
+        function closeEditUserModal() {
+            document.getElementById('editUserModal').classList.add('hidden');
+            document.getElementById('editUserForm').reset();
+        }
+
+        function deleteUser(userId) {
+            const user = users.find(u => u.id === userId);
+            
+            document.getElementById('deleteModalContent').innerHTML = `
+                <div class="text-center">
+                    <div class="bg-red-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-exclamation-triangle text-red-600 text-2xl"></i>
+                    </div>
+                    <p class="text-gray-800 mb-2">Apakah Anda yakin ingin menghapus user ini?</p>
+                    <p class="font-medium text-gray-900">${user.fullName}</p>
+                    <p class="text-sm text-gray-600">Username: ${user.username}</p>
+                    <p class="text-sm text-gray-600">Departemen: ${user.department}</p>
+                </div>
+            `;
+            
+            document.getElementById('confirmDeleteBtn').onclick = () => confirmDeleteUser(userId);
+            document.getElementById('confirmDeleteModal').classList.remove('hidden');
+        }
+
+        async function confirmDeleteUser(userId) {
+            try {
+                showLoadingIndicator('Menghapus user...');
+                
+                const result = await deleteUserById(userId);
+                
+                if (result || !isOnline) {
+                    renderUsersList();
+                    updateDashboardStats();
+                    closeConfirmDeleteModal();
+                    showSuccessMessage('User berhasil dihapus!');
+                } else {
+                    showErrorMessage('Gagal menghapus user. Silakan coba lagi.');
+                }
+            } catch (error) {
+                console.error('Delete user error:', error);
+                showErrorMessage('Gagal menghapus user. Silakan coba lagi.');
+            } finally {
+                hideLoadingIndicator();
+            }
+        }
+
+        // Reports
+        function generateReport(type) {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            
+            if (!startDate || !endDate) {
+                alert('Harap pilih tanggal mulai dan akhir!');
+                return;
+            }
+            
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+            end.setHours(23, 59, 59, 999);
+            
+            let reportContent = '';
+            let reportTitle = '';
+            
+            if (type === 'incoming') {
+                reportTitle = 'Laporan Barang Masuk';
+                reportContent = generateIncomingReport(start, end);
+            } else if (type === 'outgoing') {
+                reportTitle = 'Laporan Barang Keluar';
+                reportContent = generateOutgoingReport(start, end);
+            } else if (type === 'inventory') {
+                reportTitle = 'Laporan Inventori';
+                reportContent = generateInventoryReport();
+            }
+            
+            showPrintModal(reportTitle, reportContent);
+        }
+
+        function generateIncomingReport(startDate, endDate) {
+            return `
+                <div class="mb-6">
+                    <p class="text-gray-600">Periode: ${startDate.toLocaleDateString('id-ID')} - ${endDate.toLocaleDateString('id-ID')}</p>
+                </div>
+                <table class="w-full border-collapse border border-gray-300">
+                    <thead>
+                        <tr class="bg-gray-100">
+                            <th class="border border-gray-300 px-4 py-2 text-left">Tanggal</th>
+                            <th class="border border-gray-300 px-4 py-2 text-left">Nama Barang</th>
+                            <th class="border border-gray-300 px-4 py-2 text-left">Kategori</th>
+                            <th class="border border-gray-300 px-4 py-2 text-right">Jumlah</th>
+                            <th class="border border-gray-300 px-4 py-2 text-left">Satuan</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${items.map(item => `
+                            <tr>
+                                <td class="border border-gray-300 px-4 py-2">${new Date().toLocaleDateString('id-ID')}</td>
+                                <td class="border border-gray-300 px-4 py-2">${item.name}</td>
+                                <td class="border border-gray-300 px-4 py-2">${item.category}</td>
+                                <td class="border border-gray-300 px-4 py-2 text-right">${item.stock}</td>
+                                <td class="border border-gray-300 px-4 py-2">${item.unit}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        function generateOutgoingReport(startDate, endDate) {
+            const approvedRequests = requests.filter(r => {
+                const requestDate = new Date(r.date);
+                return r.status === 'approved' && requestDate >= startDate && requestDate <= endDate;
+            });
+            
+            let outgoingItems = [];
+            approvedRequests.forEach(request => {
+                request.items.forEach(item => {
+                    outgoingItems.push({
+                        date: request.date,
+                        name: item.name,
+                        quantity: item.quantity,
+                        unit: item.unit,
+                        requestedBy: request.userName
+                    });
+                });
+            });
+            
+            return `
+                <div class="mb-6">
+                    <p class="text-gray-600">Periode: ${startDate.toLocaleDateString('id-ID')} - ${endDate.toLocaleDateString('id-ID')}</p>
+                </div>
+                <table class="w-full border-collapse border border-gray-300">
+                    <thead>
+                        <tr class="bg-gray-100">
+                            <th class="border border-gray-300 px-4 py-2 text-left">Tanggal</th>
+                            <th class="border border-gray-300 px-4 py-2 text-left">Nama Barang</th>
+                            <th class="border border-gray-300 px-4 py-2 text-right">Jumlah</th>
+                            <th class="border border-gray-300 px-4 py-2 text-left">Satuan</th>
+                            <th class="border border-gray-300 px-4 py-2 text-left">Diminta Oleh</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${outgoingItems.map(item => `
+                            <tr>
+                                <td class="border border-gray-300 px-4 py-2">${new Date(item.date).toLocaleDateString('id-ID')}</td>
+                                <td class="border border-gray-300 px-4 py-2">${item.name}</td>
+                                <td class="border border-gray-300 px-4 py-2 text-right">${item.quantity}</td>
+                                <td class="border border-gray-300 px-4 py-2">${item.unit}</td>
+                                <td class="border border-gray-300 px-4 py-2">${item.requestedBy}</td>
+                            </tr>
+                        `).join('')}
+                        ${outgoingItems.length === 0 ? '<tr><td colspan="5" class="border border-gray-300 px-4 py-2 text-center text-gray-500">Tidak ada data</td></tr>' : ''}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        function generateInventoryReport() {
+            return `
+                <div class="mb-6">
+                    <p class="text-gray-600">Tanggal: ${new Date().toLocaleDateString('id-ID')}</p>
+                    <p class="text-gray-600">Total Item: ${items.length}</p>
+                </div>
+                <table class="w-full border-collapse border border-gray-300">
+                    <thead>
+                        <tr class="bg-gray-100">
+                            <th class="border border-gray-300 px-4 py-2 text-left">Nama Barang</th>
+                            <th class="border border-gray-300 px-4 py-2 text-left">Kategori</th>
+                            <th class="border border-gray-300 px-4 py-2 text-right">Stok</th>
+                            <th class="border border-gray-300 px-4 py-2 text-left">Satuan</th>
+                            <th class="border border-gray-300 px-4 py-2 text-left">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${items.map(item => `
+                            <tr>
+                                <td class="border border-gray-300 px-4 py-2">${item.name}</td>
+                                <td class="border border-gray-300 px-4 py-2">${item.category}</td>
+                                <td class="border border-gray-300 px-4 py-2 text-right ${item.stock <= item.minStock ? 'text-red-600 font-bold' : ''}">${item.stock}</td>
+                                <td class="border border-gray-300 px-4 py-2">${item.unit}</td>
+                                <td class="border border-gray-300 px-4 py-2">
+                                    <span class="${item.stock <= item.minStock ? 'text-red-600 font-bold' : 'text-green-600'}">
+                                        ${item.stock <= item.minStock ? 'Stok Menipis' : 'Stok Aman'}
+                                    </span>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        // Print Functions
+        function printApprovalLetter(requestId) {
+            const request = requests.find(r => r.id === requestId);
+            const approvalContent = `
+                <div class="text-center mb-8">
+                    <h1 class="text-2xl font-bold mb-2">LEMBAR PERSETUJUAN PENGAMBILAN BARANG</h1>
+                    <h2 class="text-xl">UIN PONOROGO</h2>
+                    <hr class="my-4 border-2 border-gray-800">
+                </div>
+                
+                <div class="mb-6">
+                    <table class="w-full">
+                        <tr>
+                            <td class="w-32">No. Permintaan</td>
+                            <td class="w-4">:</td>
+                            <td>#${request.id}</td>
+                        </tr>
+                        <tr>
+                            <td>Nama Pemohon</td>
+                            <td>:</td>
+                            <td>${request.userName}</td>
+                        </tr>
+                        <tr>
+                            <td>Tanggal Permintaan</td>
+                            <td>:</td>
+                            <td>${new Date(request.date).toLocaleDateString('id-ID')}</td>
+                        </tr>
+                        <tr>
+                            <td>Tanggal Persetujuan</td>
+                            <td>:</td>
+                            <td>${new Date(request.processedDate).toLocaleDateString('id-ID')}</td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <div class="mb-6">
+                    <h3 class="font-bold mb-3">DAFTAR BARANG YANG DISETUJUI:</h3>
+                    <table class="w-full border-collapse border border-gray-800">
+                        <thead>
+                            <tr class="bg-gray-100">
+                                <th class="border border-gray-800 px-4 py-2 text-left">No</th>
+                                <th class="border border-gray-800 px-4 py-2 text-left">Nama Barang</th>
+                                <th class="border border-gray-800 px-4 py-2 text-center">Jumlah</th>
+                                <th class="border border-gray-800 px-4 py-2 text-center">Satuan</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${request.items.map((item, index) => `
+                                <tr>
+                                    <td class="border border-gray-800 px-4 py-2 text-center">${index + 1}</td>
+                                    <td class="border border-gray-800 px-4 py-2">${item.name}</td>
+                                    <td class="border border-gray-800 px-4 py-2 text-center">${item.quantity}</td>
+                                    <td class="border border-gray-800 px-4 py-2 text-center">${item.unit}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="mb-6">
+                    <p><strong>Alasan Kebutuhan:</strong></p>
+                    <p class="mt-2 p-3 border border-gray-300 rounded">${request.reason}</p>
+                </div>
+                
+                <div class="mt-12">
+                    <div class="flex justify-between">
+                        <div class="text-center">
+                            <p class="mb-16">Pemohon,</p>
+                            <p class="border-t border-gray-800 pt-2 inline-block px-8">${request.userName}</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="mb-16">Petugas Gudang,</p>
+                            <p class="border-t border-gray-800 pt-2 inline-block px-8">(...........................)</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="mb-16">Disetujui oleh,</p>
+                            <p class="border-t border-gray-800 pt-2 inline-block px-8">${request.processedBy}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-8 text-sm text-gray-600">
+                    <p><strong>Catatan:</strong></p>
+                    <p>1. Lembar ini harus diserahkan kepada petugas gudang saat pengambilan barang</p>
+                    <p>2. Barang yang diambil harus sesuai dengan daftar yang tertera</p>
+                    <p>3. Simpan lembar ini sebagai bukti pengambilan barang</p>
+                </div>
+            `;
+            
+            showPrintModal('Lembar Persetujuan Pengambilan Barang', approvalContent);
+        }
+
+        function showPrintModal(title, content) {
+            document.getElementById('printContent').innerHTML = content;
+            document.getElementById('printModal').classList.remove('hidden');
+        }
+
+        function closePrintModal() {
+            document.getElementById('printModal').classList.add('hidden');
+        }
+
+        function printDocument() {
+            window.print();
+        }
+
+        // Utility Functions
+        function getStatusBadgeClass(status) {
+            switch(status) {
+                case 'pending': return 'bg-yellow-100 text-yellow-800';
+                case 'approved': return 'bg-green-100 text-green-800';
+                case 'rejected': return 'bg-red-100 text-red-800';
+                default: return 'bg-gray-100 text-gray-800';
+            }
+        }
+
+        function getStatusText(status) {
+            switch(status) {
+                case 'pending': return 'Menunggu';
+                case 'approved': return 'Disetujui';
+                case 'rejected': return 'Ditolak';
+                default: return 'Unknown';
+            }
+        }
+
+        // Modal Functions
+        function closeConfirmDeleteModal() {
+            document.getElementById('confirmDeleteModal').classList.add('hidden');
+        }
+
+        // Event Listeners
+        document.getElementById('cartBtn').addEventListener('click', openCart);
+        document.getElementById('searchItems').addEventListener('input', renderItemsCatalog);
+        document.getElementById('categoryFilter').addEventListener('change', renderItemsCatalog);
+        document.getElementById('statusFilter').addEventListener('change', renderRequestsList);
+
+        // Edit Item Form
+        document.getElementById('editItemForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const itemId = parseInt(document.getElementById('editItemId').value);
+            const item = items.find(i => i.id === itemId);
+            
+            const updatedItem = {
+                ...item,
+                name: document.getElementById('editItemName').value,
+                category: document.getElementById('editItemCategory').value,
+                stock: parseInt(document.getElementById('editItemStock').value),
+                unit: document.getElementById('editItemUnit').value
+            };
+            
+            try {
+                showLoadingIndicator('Memperbarui barang...');
+                
+                const result = await saveItem(updatedItem, true);
+                
+                if (result || !isOnline) {
+                    closeEditItemModal();
+                    renderItemsList();
+                    updateDashboardStats();
+                    showSuccessMessage('Barang berhasil diperbarui!');
+                } else {
+                    showErrorMessage('Gagal memperbarui barang. Silakan coba lagi.');
+                }
+            } catch (error) {
+                console.error('Edit item error:', error);
+                showErrorMessage('Gagal memperbarui barang. Silakan coba lagi.');
+            } finally {
+                hideLoadingIndicator();
+            }
+        });
+
+        // Edit User Form
+        document.getElementById('editUserForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const userId = parseInt(document.getElementById('editUserId').value);
+            const user = users.find(u => u.id === userId);
+            const newUsername = document.getElementById('editUserUsername').value;
+            
+            const existingUser = users.find(u => u.username === newUsername && u.id !== userId);
+            if (existingUser) {
+                alert('Username sudah digunakan oleh user lain!');
+                return;
+            }
+            
+            const updatedUser = {
+                ...user,
+                fullName: document.getElementById('editUserFullName').value,
+                username: newUsername,
+                department: document.getElementById('editUserDepartment').value,
+                role: document.getElementById('editUserRole').value
+            };
+            
+            const newPassword = document.getElementById('editUserPassword').value;
+            if (newPassword) {
+                updatedUser.password = newPassword;
+            }
+            
+            try {
+                showLoadingIndicator('Memperbarui user...');
+                
+                const result = await saveUser(updatedUser, true);
+                
+                if (result || !isOnline) {
+                    closeEditUserModal();
+                    renderUsersList();
+                    updateDashboardStats();
+                    showSuccessMessage('User berhasil diperbarui!');
+                } else {
+                    showErrorMessage('Gagal memperbarui user. Silakan coba lagi.');
+                }
+            } catch (error) {
+                console.error('Edit user error:', error);
+                showErrorMessage('Gagal memperbarui user. Silakan coba lagi.');
+            } finally {
+                hideLoadingIndicator();
+            }
+        });
+
+        // Connection monitoring
+        window.addEventListener('online', checkOnlineStatus);
+        window.addEventListener('offline', checkOnlineStatus);
+
+        // Initialize app
+        window.addEventListener('load', function() {
+            checkOnlineStatus();
+            loadAllData();
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'979eb33171ebfe14',t:'MTc1NzAwMTYyOC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
